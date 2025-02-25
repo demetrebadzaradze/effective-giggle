@@ -12,7 +12,7 @@
         <h2 class="text-2xl font-bold mb-4">Furniture Submission Form</h2>
         
         <form id="furniture-form"
-            hx-post="https://localhost:7273/random-equetion-specify"
+            hx-post="https://localhost:7273/api/AMPL/random-equetion-specify"
             hx-trigger="submit"
             hx-target="#response"
             hx-swap="innerHTML"
@@ -57,27 +57,26 @@
         initialData.forEach(addRow);
 
         // HTMX JSON extension (for sending structured JSON)
-        document.addEventListener("htmx:configRequest", function(evt) {
-            let formData = new FormData(document.getElementById("furniture-form"));
-            let data = [];
-            let names = formData.getAll("name[]");
-            let materials = formData.getAll("material[]");
-            let times = formData.getAll("time[]");
-            let values = formData.getAll("value[]");
+	document.addEventListener("htmx:configRequest", function(evt) {
+    	let formData = new FormData(document.getElementById("furniture-form"));
+    	let data = [];
+    	let names = formData.getAll("name[]");
+    	let materials = formData.getAll("material[]");
+    	let times = formData.getAll("time[]");
+    	let values = formData.getAll("value[]");
 
-            for (let i = 0; i < names.length; i++) {
-                data.push({
-                    charachter: "\u0000",
-                    name: names[i],
-                    material: parseFloat(materials[i]),
-                    time: parseFloat(times[i]),
-                    value: parseFloat(values[i])
-                });
-            }
+	    for (let i = 0; i < names.length; i++) {
+        	data.push({
+            	name: names[i],
+            	material: parseFloat(materials[i]),
+	        time: parseFloat(times[i]),
+            	value: parseFloat(values[i])
+            });
+    	}
 
-            evt.detail.headers["Content-Type"] = "application/json";
-            evt.detail.body = JSON.stringify(data);
-        });
+    	evt.detail.headers["Content-Type"] = "application/json";
+    	evt.detail.body = JSON.stringify(data);
+});
     </script>
 </body>
 </html>

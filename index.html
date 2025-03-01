@@ -6,44 +6,6 @@
     <title>Furniture Form</title>
     <script src="https://unpkg.com/htmx.org@1.9.6"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-
-document.addEventListener("htmx:configRequest", function(evt) {
-    evt.preventDefault(); // Stop the default HTMX submission
-
-    let formData = new FormData(document.getElementById("furniture-form"));
-    let data = [];
-    
-    let names = formData.getAll("name[]");
-    let materials = formData.getAll("material[]");
-    let times = formData.getAll("time[]");
-    let values = formData.getAll("value[]");
-
-    for (let i = 0; i < names.length; i++) {
-        data.push({
-            name: names[i],
-            material: parseFloat(materials[i]),
-            time: parseFloat(times[i]),
-            value: parseFloat(values[i])
-        });
-    }
-
-    let jsonData = JSON.stringify({ products: data });
-
-    console.log("Sending JSON Data:", jsonData);
-
-    htmx.ajax("POST", "https://localhost:7273/api/AMPL/random-equetion-specify", {
-        headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-        },
-        body: jsonData,
-        target: "#response",
-        swap: "innerHTML"
-    });
-});
-
-    </script>
 </head>
 <body class="bg-gray-100 p-6">
     <div class="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow">
@@ -52,8 +14,11 @@ document.addEventListener("htmx:configRequest", function(evt) {
         <form id="furniture-form"
             hx-post="https://localhost:7273/api/AMPL/random-equetion-specify"
     	    hx-trigger="submit"
-       	    hx-target="#response"
-    	    hx-swap="innerHTML"
+            hx-target="#response"
+            hx-swap="innerHTML"
+            hx-ext="json-enc"
+            enctype="application/json"
+            class="space-y-4"
 	>
             <div id="items">
                 <!-- Dynamic rows will be added here -->
@@ -72,8 +37,7 @@ document.addEventListener("htmx:configRequest", function(evt) {
             { name: "Chair", material: 3, time: 0.2, value: 20 },
             { name: "Table", material: 4, time: 0.5, value: 30 },
         ];
-
-        function addRow(item = { name: "", material: "", time: "", value: "" }) {
+function addRow(item = { name: "", material: "", time: "", value: "" }) {
             const container = document.getElementById("items");
             const row = document.createElement("div");
             row.classList.add("flex", "space-x-2", "mb-2");
@@ -89,6 +53,7 @@ document.addEventListener("htmx:configRequest", function(evt) {
 
         // Populate initial data
         initialData.forEach(addRow);
+
     </script>
 </body>
 </html>

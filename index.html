@@ -6,6 +6,44 @@
     <title>Furniture Form</title>
     <script src="https://unpkg.com/htmx.org@1.9.6"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+
+document.addEventListener("htmx:configRequest", function(evt) {
+    evt.preventDefault(); // Stop the default HTMX submission
+
+    let formData = new FormData(document.getElementById("furniture-form"));
+    let data = [];
+    
+    let names = formData.getAll("name[]");
+    let materials = formData.getAll("material[]");
+    let times = formData.getAll("time[]");
+    let values = formData.getAll("value[]");
+
+    for (let i = 0; i < names.length; i++) {
+        data.push({
+            name: names[i],
+            material: parseFloat(materials[i]),
+            time: parseFloat(times[i]),
+            value: parseFloat(values[i])
+        });
+    }
+
+    let jsonData = JSON.stringify({ products: data });
+
+    console.log("Sending JSON Data:", jsonData);
+
+    htmx.ajax("POST", "https://localhost:7273/api/AMPL/random-equetion-specify", {
+        headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        },
+        body: jsonData,
+        target: "#response",
+        swap: "innerHTML"
+    });
+});
+
+    </script>
 </head>
 <body class="bg-gray-100 p-6">
     <div class="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow">
@@ -13,12 +51,10 @@
         
         <form id="furniture-form"
             hx-post="https://localhost:7273/api/AMPL/random-equetion-specify"
-            hx-trigger="submit"
-            hx-target="#response"
-            hx-swap="innerHTML"
-            hx-ext="json-enc"
-            class="space-y-4"
-        >
+    	    hx-trigger="submit"
+       	    hx-target="#response"
+    	    hx-swap="innerHTML"
+	>
             <div id="items">
                 <!-- Dynamic rows will be added here -->
             </div>
@@ -33,10 +69,8 @@
     <script>
         // Initial data
         let initialData = [
-            { name: "BirchDrawer", material: 3.81, time: 6.82, value: 90.72 },
-            { name: "RosewoodCoffeetable", material: 8.46, time: 4.85, value: 12.16 },
-            { name: "MapleCabinet", material: 4.52, time: 7.04, value: 47.11 },
-            { name: "MahoganyDesk", material: 9.77, time: 7.68, value: 5.28 }
+            { name: "Chair", material: 3, time: 0.2, value: 20 },
+            { name: "Table", material: 4, time: 0.5, value: 30 },
         ];
 
         function addRow(item = { name: "", material: "", time: "", value: "" }) {
@@ -55,28 +89,6 @@
 
         // Populate initial data
         initialData.forEach(addRow);
-
-        // HTMX JSON extension (for sending structured JSON)
-	document.addEventListener("htmx:configRequest", function(evt) {
-    	let formData = new FormData(document.getElementById("furniture-form"));
-    	let data = [];
-    	let names = formData.getAll("name[]");
-    	let materials = formData.getAll("material[]");
-    	let times = formData.getAll("time[]");
-    	let values = formData.getAll("value[]");
-
-	    for (let i = 0; i < names.length; i++) {
-        	data.push({
-            	name: names[i],
-            	material: parseFloat(materials[i]),
-	        time: parseFloat(times[i]),
-            	value: parseFloat(values[i])
-            });
-    	}
-
-    	evt.detail.headers["Content-Type"] = "application/json";
-    	evt.detail.body = JSON.stringify(data);
-});
     </script>
 </body>
 </html>

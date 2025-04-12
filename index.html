@@ -5,26 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Furniture Form</title>
     <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+    <script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
+
 <body class="bg-gray-100 p-6">
     <div class="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow">
         <h2 class="text-2xl font-bold mb-4">Furniture Submission Form</h2>
         
         <form id="furniture-form"
-            hx-post="https://localhost:7273/api/AMPL/random-equetion-specify"
-    	    hx-trigger="submit"
-            hx-target="#response"
-            hx-swap="innerHTML"
-            hx-ext="json-enc"
-            enctype="application/json"
-            class="space-y-4"
-	>
+              hx-post="https://localhost:7273/api/AMPL/random-equetion-specify"
+              hx-trigger="submit"
+              hx-target="#response"
+              hx-swap="innerHTML"
+              hx-ext="json-enc"
+              enctype="application/json"
+              class="space-y-4"
+              hx-indicator="#spinner">
+
             <div id="items">
                 <!-- Dynamic rows will be added here -->
             </div>
 
             <button type="button" onclick="addRow()" class="bg-blue-500 text-white px-4 py-2 rounded">➕ Add Item</button>
+            <svg id="spinner" class="hidden h-5 w-5 animate-spin text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l4-4-4-4v4a8 8 0 00-8 8z" />
+            </svg>
+
             <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded">📨 Submit</button>
         </form>
 
@@ -37,15 +45,43 @@
             { name: "Chair", material: 3, time: 0.2, value: 20 },
             { name: "Table", material: 4, time: 0.5, value: 30 },
         ];
-function addRow(item = { name: "", material: "", time: "", value: "" }) {
+        document.body.addEventListener('htmx:afterRequest', function (evt) {
+            const response = evt.detail.xhr.response;
+
+            try {
+                const data = JSON.parse(response);
+
+                const container = document.getElementById("response");
+                container.innerHTML = "";
+
+                data.forEach(item => {
+                    const row = document.createElement("div");
+                    row.classList.add("flex", "items-center", "space-x-2", "bg-gray-100", "p-3", "rounded", "shadow-sm");
+
+                    row.innerHTML = `
+                        <div class="flex-1 font-medium text-gray-800">${item.name}</div>
+                        <div class="w-24 text-sm text-gray-600"><strong>Amount:</strong> ${item.amount}</div>
+                        <div class="w-24 text-sm text-gray-600"><strong>Value:</strong> ${item.totalvalue}</div>
+                        <div class="w-24 text-sm text-gray-600"><strong>Material:</strong> ${item.totalMaterial}</div>
+                        <div class="w-24 text-sm text-gray-600"><strong>Time:</strong> ${item.totalTime}</div>
+                    `;
+
+                    container.appendChild(row);
+                });
+
+            } catch (err) {
+                console.error("Failed to parse JSON response:", err);
+            }
+        });
+        function addRow(item = { name: "", material: "", time: "", value: "" }) {
             const container = document.getElementById("items");
             const row = document.createElement("div");
             row.classList.add("flex", "space-x-2", "mb-2");
             row.innerHTML = `
-                <input type="text" name="name[]" placeholder="Name" value="${item.name}" class="border p-2 flex-1" required>
-                <input type="number" step="0.01" name="material[]" placeholder="Material" value="${item.material}" class="border p-2 w-24" required>
-                <input type="number" step="0.01" name="time[]" placeholder="Time" value="${item.time}" class="border p-2 w-24" required>
-                <input type="number" step="0.01" name="value[]" placeholder="Value" value="${item.value}" class="border p-2 w-24" required>
+                <input type="text" name="name" placeholder="Name" value="${item.name}" class="border p-2 flex-1" required>
+                <input type="number" step="0.01" name="material" placeholder="Material" value="${item.material}" class="border p-2 w-24" required>
+                <input type="number" step="0.01" name="time" placeholder="Time" value="${item.time}" class="border p-2 w-24" required>
+                <input type="number" step="0.01" name="value" placeholder="Value" value="${item.value}" class="border p-2 w-24" required>
                 <button type="button" onclick="this.parentElement.remove()" class="bg-red-500 text-white px-2 py-1 rounded">❌</button>
             `;
             container.appendChild(row);
@@ -53,6 +89,7 @@ function addRow(item = { name: "", material: "", time: "", value: "" }) {
 
         // Populate initial data
         initialData.forEach(addRow);
+
 
     </script>
 </body>
